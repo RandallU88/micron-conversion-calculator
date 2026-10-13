@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Micron / mm / Inch Conversion Calculator</title>
+  <style>
+    :root {
+      --paper: #f4f0e6;
+      --ink: #1a1a1a;
+      --rule: #3a3a3a;
+      --accent: #8b1e1e;
+      --muted: #5c564c;
+      --tape: #c9c3b0;
+      --shadow: rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Courier New", Courier, monospace;
+      background:
+        radial-gradient(ellipse at top, #3a3a3a, #1c1c1c 55%);
+      color: var(--ink);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 28px 16px 48px;
+    }
+    .board {
+      width: min(720px, 100%);
+    }
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      color: #eee8d8;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      margin: 0 0 6px;
+      text-align: center;
+    }
+    .sub {
+      text-align: center;
+      color: #b8b09a;
+      font-size: .78rem;
+      margin-bottom: 18px;
+    }
+    .sheet {
+      background: var(--paper);
+      border: 1px solid #d8d2c4;
+      box-shadow:
+        0 1px 0 #fff inset,
+        0 18px 40px var(--shadow);
+      padding: 22px 22px 18px;
+      position: relative;
+    }
+    .sheet::before,
+    .sheet::after {
+      content: "";
+      position: absolute;
+      width: 46px;
+      height: 18px;
+      background: var(--tape);
+      opacity: .85;
+      box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    }
+    .sheet::before { top: -8px; left: 28px; transform: rotate(-3deg); }
+    .sheet::after { top: -7px; right: 36px; transform: rotate(4deg); }
+    .headers {
+      display: grid;
+      grid-template-columns: 1.2fr .9fr 1.2fr;
+      gap: 8px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      margin-bottom: 10px;
+      font-size: .92rem;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1.2fr .9fr 1.2fr;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px dotted #c4bda8;
+      font-size: .95rem;
+    }
+    .row span:nth-child(2) { text-align: right; padding-right: 8px; }
+    .divider {
+      margin: 16px 0 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+    }
+    .note {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.35;
+    }
+    .calc {
+      margin-top: 22px;
+      background: #1f1f1f;
+      color: #f2ecde;
+      padding: 18px 18px 16px;
+      border: 1px solid #3a3a3a;
+    }
+    .calc h2 {
+      margin: 0 0 12px;
+      font-size: .95rem;
+      letter-spacing: .08em;
+      color: #e8d9a8;
+      font-weight: 700;
+    }
+    label { display: block; font-size: .75rem; color: #bdb6a3; margin-bottom: 4px; }
+    .controls {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    input[type="number"], select {
+      width: 100%;
+      background: #111;
+      color: #f5efdf;
+      border: 1px solid #555;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 1rem; min-height: 48px;
+    }
+    input[type="number"]:focus, select:focus {
+      outline: 1px solid #c9a227;
+      border-color: #c9a227;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: .04em;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:hover { filter: brightness(1.08); }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .card {
+      background: #151515;
+      border: 1px solid #3d3d3d;
+      padding: 10px;
+    }
+    .card .u {
+      font-size: .7rem;
+      color: #b8ae94;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .card .v {
+      font-size: 1.15rem;
+      margin-top: 4px;
+      word-break: break-all;
+      color: #fff8e6;
+    }
+    .opening {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #4a4a4a;
+    }
+    .opening .line {
+      font-size: .92rem;
+      margin-top: 8px;
+    }
+    .opening strong { color: #e8d9a8; }
+    .fine {
+      margin-top: 12px;
+      font-size: .72rem;
+      color: #9a937f;
+      line-height: 1.4;
+    }
+    @media (max-width: 620px) {
+      .headers, .row, .controls, .results {
+        grid-template-columns: 1fr;
+      }
+      .row span:nth-child(2) { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="board">
+    <h1>SHOP CONVERSION CALCULATOR</h1>
+    <p class="sub">Microns · Millimeters · Inches · from the taped chart</p>
+
+    <div class="sheet">
+      <div class="headers">
+        <div>MULTIPLY</div>
+        <div>BY ×</div>
+        <div>TO OBTAIN</div>
+      </div>
+      <div class="row"><span>Microns</span><span>0.001</span><span>Millimeters</span></div>
+      <div class="row"><span>Microns</span><span>0.00003937</span><span>Inches</span></div>
+      <div class="row"><span>Millimeter</span><span>0.03937</span><span>Inches</span></div>
+      <div class="row"><span>Millimeter</span><span>1,000.0</span><span>Micron</span></div>
+      <div class="row"><span>Inches</span><span>25.4</span><span>Millimeters</span></div>
+      <div class="row"><span>Inches</span><span>25,400.0</span><span>Micron</span></div>
+
+      <div class="divider">DIVIDE</div>
+      <div class="row">
+        <span>Opening (Inches)</span>
+        <span>By: .00003937</span>
+        <span>Microns</span>
+      </div>
+      <div class="note">
+        Chart factors kept as written. Live calculator below uses the exact
+        international inch: 1 in = 25.4 mm = 25,400 µm. The chart’s 0.00003937
+        is a rounded 1/25,400.
+      </div>
+    </div>
+
+    <div class="calc">
+      <h2>LIVE CONVERTER</h2>
+      <div class="controls">
+        <div>
+          <label for="val">Value</label>
+          <input id="val" type="number" inputmode="decimal" step="any" value="1" />
+        </div>
+        <div>
+          <label for="unit">From unit</label>
+          <select id="unit">
+            <option value="um">Microns (µm)</option>
+            <option value="mm">Millimeters (mm)</option>
+            <option value="in">Inches (in)</option>
+          </select>
+        </div>
+        <button type="button" id="go">CONVERT</button>
+      </div>
+
+      <div class="results">
+        <div class="card">
+          <div class="u">Microns</div>
+          <div class="v" id="outUm">-</div>
+        </div>
+        <div class="card">
+          <div class="u">Millimeters</div>
+          <div class="v" id="outMm">-</div>
+        </div>
+        <div class="card">
+          <div class="u">Inches</div>
+          <div class="v" id="outIn">-</div>
+        </div>
+      </div>
+
+      <div class="opening">
+        <label for="opening">Opening (inches) → microns</label>
+        <input id="opening" type="number" inputmode="decimal" step="any" placeholder="e.g. 0.010" />
+        <div class="line">
+          Chart method: opening ÷ 0.00003937 =
+          <strong id="openChart">-</strong> µm
+        </div>
+        <div class="line">
+          Exact method: opening × 25,400 =
+          <strong id="openExact">-</strong> µm
+        </div>
+      </div>
+
+      <p class="fine">
+        Exact factors used for live results: 1 mm = 1,000 µm; 1 in = 25.4 mm;
+        1 in = 25,400 µm; 1 µm = 0.001 mm; 1 µm = 1/25,400 in ≈ 0.00003937007874 in.
+        Values update as you type.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const IN_TO_MM = 25.4;
+    const IN_TO_UM = 25400;
+    const MM_TO_UM = 1000;
+    const CHART_UM_IN_INCH = 0.00003937;
+
+    const valEl = document.getElementById("val");
+    const unitEl = document.getElementById("unit");
+    const outUm = document.getElementById("outUm");
+    const outMm = document.getElementById("outMm");
+    const outIn = document.getElementById("outIn");
+    const openingEl = document.getElementById("opening");
+    const openChart = document.getElementById("openChart");
+    const openExact = document.getElementById("openExact");
+
+    function fmt(n) {
+      if (!Number.isFinite(n)) return "-";
+      const abs = Math.abs(n);
+      if (abs !== 0 && (abs < 0.0001 || abs >= 1e7)) return n.toExponential(6);
+      return n.toLocaleString(undefined, { maximumFractionDigits: 10 });
+    }
+
+    function toMicrons(value, unit) {
+      if (unit === "um") return value;
+      if (unit === "mm") return value * MM_TO_UM;
+      return value * IN_TO_UM;
+    }
+
+    function convert() {
+      const raw = parseFloat(valEl.value);
+      if (!Number.isFinite(raw)) {
+        outUm.textContent = outMm.textContent = outIn.textContent = "-";
+        return;
+      }
+      const um = toMicrons(raw, unitEl.value);
+      outUm.textContent = fmt(um);
+      outMm.textContent = fmt(um / MM_TO_UM);
+      outIn.textContent = fmt(um / IN_TO_UM);
+    }
+
+    function convertOpening() {
+      const raw = parseFloat(openingEl.value);
+      if (!Number.isFinite(raw)) {
+        openChart.textContent = openExact.textContent = "-";
+        return;
+      }
+      openChart.textContent = fmt(raw / CHART_UM_IN_INCH);
+      openExact.textContent = fmt(raw * IN_TO_UM);
+    }
+
+    ["input", "change"].forEach(evt => {
+      valEl.addEventListener(evt, convert);
+      unitEl.addEventListener(evt, convert);
+      openingEl.addEventListener(evt, convertOpening);
+    });
+    document.getElementById("go").addEventListener("click", convert);
+    convert();
+  </script>
+</body>
+</html>
